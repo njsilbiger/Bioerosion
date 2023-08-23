@@ -32,7 +32,7 @@ mat2df<-function(x){
 
 img1_df<-img1$img %>%
   set_names()
-  #lmap()
+  #lmap(mat2df) # this is causing a problem with the names... stopped here
 
 
 a<-img1$img$`Data/Bioerosion_Block57R_2019_Dicom/Bioerosion_Block57R_2019_Dicom_120.dcm`
