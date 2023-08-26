@@ -69,10 +69,15 @@ img_diff <-left_join(img1_df, img2_df)%>%
          )
  
 img_diff <- img_diff%>%
-  mutate(binary_norm = case_when(diff_density   > 40 ~ 1, # give a 1 if accretion
-                                 diff_density < -40 ~ -1, # a -1 if erosion
-                                 .default = 0)  # 0 of no change, but based on a threshold of 100
-  )
+  mutate(value2019_binary = ifelse(value2019_norm>0,1,0), # if anything is there give it a 1
+         value2023_binary = ifelse(value2023_norm>0,1,0), # if anything is there give it a 1
+         binary_norm = case_when(diff_density > 10 ~ 1, # give a 1 if accretion
+                                 diff_density < -8 ~ -1, # a -1 if erosion
+                                 .default = 0), # 0 of no change, but based on a threshold of 100
+         # subtract the normalized data,
+         diff_binary = value2023_binary - value2019_binary # subtract the binary data
+  )  # 0 of no change, but based on a threshold of 100
+  
 
 
 img_diff %>%
@@ -82,8 +87,8 @@ img_diff %>%
 
 
 p1<-img_diff %>%
-  filter(ID == "slice_320")%>%
-  ggplot(aes(x = col, y = row, fill = binary)) +
+  filter(ID == "slice_120")%>%
+  ggplot(aes(x = col, y = row, fill = diff_binary)) +
   geom_tile() +
   scale_fill_gradient2(
     low = "black", mid = "white", high = "red",
@@ -94,7 +99,7 @@ p1<-img_diff %>%
 
 
 p1<-img_diff %>%
-  filter(ID == "slice_220")%>%
+  filter(ID == "slice_320")%>%
   ggplot(aes(x = col, y = row, fill = diff_density)) +
   geom_tile() +
   scale_fill_gradient2(
