@@ -138,14 +138,14 @@ img_diff %>%
   facet_wrap(~year)
 
 img_diff %>%
-  filter(ID == "slice_101") %>%
+  filter(ID == "slice_42") %>%
   select(row, col, diff) %>%
  # mutate(diff = ifelse(diff > -15000, NA, diff))%>%
-  ggplot(aes(x = col, y = row, alpha = diff)) +
+  ggplot(aes(x = col, y = row, fill = diff)) +
   geom_tile() +
-  # scale_fill_gradient2(
-  #   low = "white", mid = "grey", high = "darkorange", midpoint = 0
-  #     ) +
+   scale_fill_gradient2(
+     low = "white", mid = "grey", high = "darkorange", midpoint = 0
+       ) +
   theme_void() 
   #theme(legend.position = "none")
 
