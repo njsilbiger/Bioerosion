@@ -13,8 +13,8 @@ library(oro.dicom)
 ## Load image path #####
 
 
-img1<-readDICOM("Data/Bioerosion_Block57R_2019_Dicom/")
-img2<-readDICOM("Data/Bioerosion_Block57R_2023_Dicom/")
+img1<-readDICOM("Data/2019_70/")
+img2<-readDICOM("Data/2023_70/")
 
 
 # create a function to turn each matrix in the list into a dataframe
@@ -27,7 +27,7 @@ mat2df<-function(x){
 }
 
 
-# Make it into a huge dataframe named bu slice number
+# Make it into a huge dataframe named by slice number
 
 # img 1
 img1_df<-img1$img %>%
@@ -82,8 +82,8 @@ img_diff <- img_diff%>%
 
 img_diff %>%
   ggplot()+
-  geom_histogram(aes(x = value2019_norm), alpha = 0.5, color = "red")+
-  geom_histogram(aes(x = value2023_norm), alpha = 0.5, color = "blue")
+  geom_histogram(aes(x = value2019_norm), alpha = 0.5, fill = "red")+
+  geom_histogram(aes(x = value2023_norm), alpha = 0.5, fill = "blue")
 
 
 p1<-img_diff %>%
@@ -106,13 +106,13 @@ p1<-img_diff %>%
     low = "white", mid = "darkorange", high = "black",
     #limits = c(0, 3), midpoint = 1.5, oob = scales::squish
   ) +
-  theme_void() 
+  theme_void() +
   theme(legend.position = "none")
 
 
 img1_df %>%
-  filter(ID == "slice_ 12" | ID == "slice_ 18") %>%
-  ggplot(aes(x = col, y = row, fill = value)) +
+  filter(ID == "slice_12" | ID == "slice_18") %>%
+  ggplot(aes(x = col, y = row, fill = value2019)) +
   geom_tile() +
   scale_fill_gradient2(
     low = "white", mid = "darkorange", high = "black",
@@ -122,40 +122,33 @@ img1_df %>%
   theme(legend.position = "none")+
   facet_wrap(~ID)
 
-
-  #lmap(mat2df) # this is causing a problem with the names... stopped here
-
-a<-img1$img$`Data/Bioerosion_Block57R_2019_Dicom/Bioerosion_Block57R_2019_Dicom_0120.dcm`
-a23<-img2$img$`Data/Bioerosion_Block57R_2023_Dicom/Bioerosion_Block57R_2023_Dicom_0120.dcm`
-
-data_for_ggplot <- as.data.frame(a) %>% 
-  mutate(row = rownames(.)) %>% 
-  tidyr::pivot_longer(-row, names_to = "col") %>%
-  mutate(row = as.numeric(row), col = readr::parse_number(col))
-
-data_for_ggplot23 <- as.data.frame(a23) %>% 
-  mutate(row = rownames(.)) %>% 
-  tidyr::pivot_longer(-row, names_to = "col") %>%
-  mutate(row = as.numeric(row), col = readr::parse_number(col))
-
-p1 <- ggplot(data_for_ggplot, aes(x = col, y = row, fill = value)) +
+# slices side by side
+img_diff %>%
+  filter(ID == "slice_100") %>%
+  select(row, col, value2019, value2023) %>%
+  pivot_longer(cols = c(value2019, value2023), names_to = "year", values_to = "value")%>%
+  ggplot(aes(x = col, y = row, fill = value)) +
   geom_tile() +
   scale_fill_gradient2(
     low = "white", mid = "darkorange", high = "black",
     #limits = c(0, 3), midpoint = 1.5, oob = scales::squish
   ) +
-  labs(title = "2019") +
   theme_void() +
-  theme(legend.position = "none")
+  theme(legend.position = "none")+
+  facet_wrap(~year)
 
-p2 <- ggplot(data_for_ggplot23, aes(x = col, y = row, fill = value)) +
+img_diff %>%
+  filter(ID == "slice_101") %>%
+  select(row, col, diff) %>%
+ # mutate(diff = ifelse(diff > -15000, NA, diff))%>%
+  ggplot(aes(x = col, y = row, alpha = diff)) +
   geom_tile() +
-  scale_fill_gradient2(
-    low = "white", mid = "darkorange", high = "black",
-    #limits = c(0, 3), midpoint = 1.5, oob = scales::squish
-  ) +
-  labs(title = "2023") +
-  theme_void() +
-  theme(legend.position = "none")
+  # scale_fill_gradient2(
+  #   low = "white", mid = "grey", high = "darkorange", midpoint = 0
+  #     ) +
+  theme_void() 
+  #theme(legend.position = "none")
 
-p1+p2
+  
+#lmap(mat2df) # this is causing a problem with the names... stopped here
+
